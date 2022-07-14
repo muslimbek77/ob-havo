@@ -1,7 +1,17 @@
-from telegram import InlineKeyboardMarkup, InlineKeyboardButton
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+from telegram import InlineKeyboardMarkup, InlineKeyboardButton,ReplyKeyboardMarkup, Update
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler,MessageHandler,Filters
 import requests
 from bs4 import BeautifulSoup as BS
+
+
+buttons = [
+        ["Aloqa","Biz haqimizda"],
+        
+        ["Manzil"]
+    ]
+
+replys_markup = ReplyKeyboardMarkup(buttons,
+                                       resize_keyboard=True)
 
 
 viloyat ={
@@ -51,6 +61,19 @@ def back():
         [InlineKeyboardButton("Orqaga", callback_data=f"back1")]
     ]
 
+def aloqa(update, context):
+    text = 'Aloqa'
+    context.bot.send_message(chat_id=update.effective_chat.id, 
+                             text=text)  
+
+def bizxaqimizda(update:Update, context):
+    text = 'Manzil'
+    context.bot.send_message(chat_id=update.effective_chat.id, 
+                             text=text) 
+def location(update, context):
+
+    update.message.reply_location(2,2) 
+
 
 def inline_handlerlar(update, context):
     query = update.callback_query
@@ -69,16 +92,32 @@ def inline_handlerlar(update, context):
 def start(update, context):
     user = update.message.from_user
     update.message.reply_text(f"""Salom {user.first_name} 🖐🏼\nBu yerdan Kerakli joy nomini tanlang 👇""",
-                              reply_markup=InlineKeyboardMarkup(city()))
+                              reply_markup=InlineKeyboardMarkup(city()),)
 def help(update,context):
     update.message.reply_text("Bu bot 12 viloyat ob-havo ma'lumotini ko'rsatadi.\nAdmin:@MuslimMuslih")
 
+def about(update, context):
+    user = update.message.from_user
+    update.message.reply_text(f"""Salom {user.first_name} 🖐🏼\nBu yerda biz haqimizda ma'lumot olishingiz mumkin 👇""",
+                              reply_markup=replys_markup)
+
+
 def main():
-    Token = "5317958815:AAG7XdqdenDvwDf4Y41XeHV2hzIwv4LvBPw"
+    Token = "2066983997:AAH8_5X2qp2n_oYsyMCZXPF5SMz_saydKqI"
     updater = Updater(Token)
     updater.dispatcher.add_handler(CommandHandler("start", start))
     updater.dispatcher.add_handler(CommandHandler("help", help))
     updater.dispatcher.add_handler(CallbackQueryHandler(inline_handlerlar))
+    updater.dispatcher.add_handler(CommandHandler("about", about))
+    aloqa_hendler = MessageHandler(Filters.text('Aloqa'),aloqa)
+    updater.dispatcher.add_handler(aloqa_hendler)
+
+    about_hendler = MessageHandler(Filters.text('Biz haqimizda'),bizxaqimizda)
+    updater.dispatcher.add_handler(about_hendler)
+
+    location_hendler = MessageHandler(Filters.text('Manzil'),location)
+    updater.dispatcher.add_handler(location_hendler)
+
     updater.start_polling()
     updater.idle()
 
